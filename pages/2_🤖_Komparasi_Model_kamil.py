@@ -62,5 +62,4 @@ def show_page():
     )
 
 # Baris di bawah ini berguna agar kamu bisa menguji halaman ini secara mandiri terlebih dahulu
-if __name__ == "__main__":
-    show_page()
+show_page()
