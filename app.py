@@ -1,144 +1,173 @@
 import streamlit as st
-import pandas as pd
-import numpy as np
-import os
-import joblib
-from sklearn.ensemble import RandomForestRegressor
 
 # ==========================================
-# 1. SETUP HALAMAN & JUDUL APP
+# 1. KONFIGURASI HALAMAN UTAMA
 # ==========================================
-st.set_page_config(page_title="Prediksi Engagement Sosmed", layout="centered")
-st.title("📊 Social Media Engagement Predictor")
-st.subheader("Aplikasi Prediksi Waktu Terbaik & Optimasi Posting Konten")
+st.set_page_config(
+    page_title="Social Media Engagement Predictor",
+    page_icon="📈",
+    layout="wide"
+)
 
 # ==========================================
-# 2. LOAD & PREPROCESS DATA (SINKRON DENGAN IHSAN)
+# 2. INJEKSI CUSTOM CSS (BIAR MAKIN MEWAH & ESTETIK)
 # ==========================================
-@st.cache_data
-def load_and_prep_data():
-    # Menggunakan dataset asli seperti yang dipakai Ihsan pas training
-    data_path = "data/social_media_engagement_dataset.csv"
-    if not os.path.exists(data_path):
-        st.error(f"File {data_path} tidak ditemukan! Pastikan dataset ada di folder data/.")
-        return None, None
+st.markdown("""
+    <style>
+        /* Efek kartu modern untuk metrik */
+        div[data-testid="stMetricBlock"] {
+            background-color: #1e293b;
+            border: 1px solid #334155;
+            padding: 20px 25px !important;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: transform 0.2s;
+        }
+        div[data-testid="stMetricBlock"]:hover {
+            transform: translateY(-2px);
+            border-color: #38bdf8;
+        }
+        /* Styling teks metrik */
+        div[data-testid="stMetricLabel"] {
+            color: #94a3b8 !important;
+            font-size: 14px !important;
+            font-weight: 600 !important;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        div[data-testid="stMetricValue"] {
+            color: #38bdf8 !important;
+            font-size: 32px !important;
+            font-weight: 700 !important;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
+# ==========================================
+# 3. SIDEBAR - NAVIGASI & INFORMASI TIM
+# ==========================================
+with st.sidebar:
+    st.title("🚀 Navigasi Proyek")
+    st.write("Gunakan menu di atas untuk berpindah halaman dan melihat fitur interaktif.")
+    
+    st.markdown("---")
+    st.markdown("### 👥 Struktur Organisasi Tim:")
+    st.markdown("- **Ailum M. L.** (Project Manager / Core Dev)")
+    st.markdown("- **Mendy** (UI/UX & Visualisasi EDA)")
+    st.markdown("- **Muhammad** (Analisis Data & PPT)")
+    st.markdown("- **Ihsan Kamil** (Lead Machine Learning)")
+    st.markdown("- **Fatih** (Model Evaluation & Testing)")
+    st.markdown("- **Indah B.** (Data Cleaning Specialist)")
+    st.markdown("- **Widya** (Feature Engineering Specialist)")
+    
+    st.markdown("---")
+    st.info("💡 **Status Proyek:** Phase 2 (Integration & Multi-Page Migration)")
+
+# ==========================================
+# 4. KONTEN UTAMA (LANDING PAGE)
+# ==========================================
+# Menambahkan dekorasi badge html agar terlihat seperti dashboard enterprise
+st.markdown("""
+    <div style="display: flex; gap: 8px; margin-bottom: -10px;">
+        <span style="background-color: #0369a1; color: #e0f2fe; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: bold;">PRODUCTION READY</span>
+        <span style="background-color: #15803d; color: #dcfce7; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: bold;">ML ENGINE V2.4</span>
+    </div>
+""", unsafe_allow_html=True)
+
+st.title("📱 Social Media Engagement Predictor Dashboard")
+st.subheader("Optimasi Performa Konten Berbasis Machine Learning")
+
+st.markdown("""
+Selamat datang di aplikasi **Social Media Engagement Predictor**. Aplikasi ini dirancang untuk membantu para content creator, 
+digital marketer, dan brand dalam memprediksi serta mengoptimalkan tingkat interaksi (*engagement rate*) dari postingan mereka 
+sebelum konten tersebut diunggah ke media sosial.
+""")
+
+st.markdown("---")
+
+# ==========================================
+# 5. RINGKASAN PROGRESS & METRIK (DENGAN STYLE GLOW HOVER)
+# ==========================================
+st.subheader("📊 Ringkasan Eksekutif & Status Pengembangan")
+
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    st.metric(
+        label="Sistem Arsitektur", 
+        value="Multi-Page v2", 
+        delta="Migrasi Sukses"
+    )
+
+with col2:
+    st.metric(
+        label="Model Utama", 
+        value="Random Forest", 
+        delta="Optimized", 
+        delta_color="normal"
+    )
+
+with col3:
+    st.metric(
+        label="Akurasi Model Terbaik (R²)", 
+        value="47.04%", 
+        delta="Naik dari 31.25% Baseline", 
+        delta_color="normal"
+    )
+
+st.markdown("---")
+
+# ==========================================
+# 6. EXPANDER DENGAN STATUS TERLIPAT (expanded=False) ⚙️
+# ==========================================
+st.subheader("⚙️ Detail Informasi & Spesifikasi Model")
+
+with st.expander("🔍 Klik untuk Meninjau Detail Jeroan Model Machine Learning", expanded=False):
+    col_mod1, col_mod2 = st.columns(2)
+    
+    with col_mod1:
+        st.markdown("### 📊 Parameter Hasil Tuning:")
+        st.write("• **Algoritma Utama:** Random Forest Regressor")
+        st.write("• **Akurasi Akhir (R² Score):** `47.04%` (Setelah Hyperparameter Tuning)")
+        st.write("• **Akurasi Baseline:** `31.25%` (Sebelum Optimasi)")
+        st.write("• **Fitur Input Utama (X):** `Follower_Count`, `Content_Length`, `Hour_of_Day`, `Platform`, `Content_Type`")
+        st.write("• **Target Prediksi (y):** `Engagement_Rate` (Skala Persentase)")
+
+    with col_mod2:
+        st.markdown("### 🧠 Mengapa Random Forest?")
+        st.write("""
+        Algoritma **Random Forest** dipilih karena bekerja dengan metode *ensemble* (menggabungkan puluhan 
+        pohon keputusan/Decision Trees) untuk membuat satu prediksi akhir yang kokoh. 
         
-    df = pd.read_csv(data_path)
-    df_clean = df.copy()
-    
-    # Buang kolom teks unik seperti yang dilakukan di skrip Ihsan
-    kolom_dibuang = ['Post_ID', 'Timestamp', 'User_ID']
-    for col in kolom_dibuang:
-        if col in df_clean.columns:
-            df_clean = df_clean.drop(columns=[col])
-            
-    # One-Hot Encoding otomatis (Harus sama persis dengan skrip train Ihsan)
-    df_encoded = pd.get_dummies(df_clean, drop_first=True)
-    
-    # Pisahkan fitur (X) dan target (y)
-    X = df_encoded.drop(columns=['Engagement_Rate'])
-    y = df_encoded['Engagement_Rate']
-    
-    return X, y
+        Kelebihan utama model ini dalam kasus kelompok kami adalah kemampuannya menangani hubungan non-linear 
+        antara jumlah pengikut (*followers*) dan panjang konten terhadap tingkat interaksi (*engagement*) 
+        tanpa mengalami *overfitting* yang parah jika dibandingkan dengan Decision Tree tunggal.
+        """)
 
-X, y = load_and_prep_data()
+st.markdown("---")
 
 # ==========================================
-# 3. LOAD TUNED MODEL IHSAN KAMIL
+# 7. PANDUAN PENGGUNAAN FITUR (MULTI-PAGE)
 # ==========================================
-@st.cache_resource
-def train_model(X, y):
-    model_pkl_path = "models/best_random_forest.pkl"
-    
-    if os.path.exists(model_pkl_path):
-        try:
-            # Load model cerdas berakurasi 47.04% milik Ihsan
-            model = joblib.load(model_pkl_path)
-            return model
-        except Exception as e:
-            st.warning(f"Gagal me-load model .pkl milik Ihsan ({e}). Menggunakan baseline model.")
-    
-    # Backup jika file model pkl ga ketemu
-    model = RandomForestRegressor(n_estimators=100, random_state=42)
-    model.fit(X, y)
-    return model
+st.subheader("💡 Panduan Navigasi Fitur Aplikasi")
+st.write("Silakan lihat menu di sebelah kiri atau pilih halaman yang ingin diakses:")
 
-model = train_model(X, y)
+col_page1, col_page2, col_page3 = st.columns(3)
 
-# ==========================================
-# 4. SIDEBAR INPUT UNTUK USER
-# ==========================================
-st.sidebar.header("🎯 Input Parameter Konten")
+with col_page1:
+    st.markdown("### 1. 📊 Dashboard EDA")
+    st.write("Berisi data statistik interaktif dan **diagram garis** tren *engagement* harian untuk melihat *prime time* upload konten.")
+    st.caption("Dikerjakan oleh: Mendy & Muhammad")
 
-input_platform = st.sidebar.selectbox("Platform Media Sosial", ['Instagram', 'Twitter', 'Facebook', 'LinkedIn', 'TikTok'])
-input_type = st.sidebar.selectbox("Tipe Konten", ['Image', 'Video', 'Text', 'Carousel'])
-input_category = st.sidebar.selectbox("Kategori Konten", ['Entertainment', 'Education', 'Tech', 'Fashion', 'Food', 'Lifestyle'])
+with col_page2:
+    st.markdown("### 2. 🤖 Komparasi Model")
+    st.write("Menampilkan pembuktian ilmiah berupa tabel metrik dan **diagram batang** perbandingan antara Random Forest vs Decision Tree.")
+    st.caption("Dikerjakan oleh: Ihsan & Fatih")
 
-# Tambahan fitur numerik yang ada di dataset latihan Ihsan
-input_followers = st.sidebar.number_input("Jumlah Followers Akun", min_value=0, value=1000, step=100)
-input_hashtags = st.sidebar.slider("Jumlah Hashtag yang Dipakai", min_value=0, max_value=20, value=5)
-input_length = st.sidebar.slider("Panjang Karakter Caption", min_value=1, max_value=500, value=150)
+with col_page3:
+    st.markdown("### 3. 🚀 Prediksi Engagement")
+    st.write("Fitur utama berupa kalkulator prediksi interaktif untuk menghitung estimasi *engagement rate* secara *live*.")
+    st.caption("Dikerjakan oleh: Ailum (Integrasi Core)")
 
-# Input Waktu Posting
-input_hari = st.sidebar.selectbox("Hari Posting", ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'])
-input_jam = st.sidebar.slider("Jam Posting (Format 24 Jam)", min_value=0, max_value=23, value=19)
-
-# Tambahan input metrik engagement pendukung jika terdeteksi di model latihan
-input_likes = st.sidebar.number_input("Target Likes (Estimasi awal)", min_value=0, value=50, step=5)
-input_saves = st.sidebar.number_input("Target Saves (Estimasi awal)", min_value=0, value=10, step=5)
-input_comments = st.sidebar.number_input("Target Comments (Estimasi awal)", min_value=0, value=5, step=1)
-input_shares = st.sidebar.number_input("Target Shares (Estimasi awal)", min_value=0, value=5, step=1)
-
-# ==========================================
-# 5. PEMROSESAN PREDIKSI & OUTPUT UTAMA
-# ==========================================
-if st.sidebar.button("🚀 Prediksi Engagement Rate"):
-    # Buat baris data baru dengan kolom yang diwajibkan oleh model latihan X
-    input_data = pd.DataFrame(columns=X.columns)
-    input_data.loc[0] = 0 # isi awal semua kolom dengan angka 0
-    
-    # Isi kolom numerik standar bawaan dataset
-    if 'Hour_of_Day' in input_data.columns: input_data['Hour_of_Day'] = input_jam
-    if 'Follower_Count' in input_data.columns: input_data['Follower_Count'] = input_followers
-    if 'Hashtag_Count' in input_data.columns: input_data['Hashtag_Count'] = input_hashtags
-    if 'Content_Length' in input_data.columns: input_data['Content_Length'] = input_length
-    
-    # Mengisi metrik engagement pendukung jika terdeteksi dilihat saat fit time
-    if 'Likes' in input_data.columns: input_data['Likes'] = input_likes
-    if 'Saves' in input_data.columns: input_data['Saves'] = input_saves
-    if 'Comments' in input_data.columns: input_data['Comments'] = input_comments
-    if 'Shares' in input_data.columns: input_data['Shares'] = input_shares
-    
-    # Isi kolom kategori hasil One-Hot Encoding (Set nilai ke 1 jika dipilih user)
-    col_day = f"Day_of_Week_{input_hari}"
-    col_platform = f"Platform_{input_platform}"
-    col_type = f"Content_Type_{input_type}"
-    col_category = f"Category_{input_category}"
-    
-    if col_day in input_data.columns: input_data[col_day] = 1
-    if col_platform in input_data.columns: input_data[col_platform] = 1
-    if col_type in input_data.columns: input_data[col_type] = 1
-    if col_category in input_data.columns: input_data[col_category] = 1
-    
-    try:
-        # Eksekusi Prediksi menggunakan model Ihsan Kamil yang presisi!
-        prediksi = model.predict(input_data)[0]
-        
-        # Tampilkan Hasil Sukses
-        st.balloons()
-        st.success(f"### 🔥 Estimasi Engagement Rate Konten Lu: **{prediksi:.2f}%**")
-        
-        # Rekomendasi tambahan
-        st.markdown("---")
-        st.subheader("💡 Tips Optimasi Konten Tambahan:")
-        if input_jam < 12:
-            st.info("📌 Konten lu diposting pagi/siang hari. Coba tes posting di jam prima malam hari (18:00 - 21:00) untuk membandingkan peningkatan engagement secara organik.")
-        else:
-            st.info("📌 Waktu posting yang lu pilih sudah berada di jam prime time! Pertahankan konsistensi jadwal posting ini.")
-            
-    except Exception as e:
-        st.error(f"Terjadi kesalahan saat memprediksi: {e}")
-        st.text("Detail kolom yang dikirim ke model:")
-        st.write(input_data)
-else:
-    st.info("👈 Silakan isi parameter konten di sidebar sebelah kiri, lalu klik tombol **Prediksi Engagement Rate** untuk melihat hasilnya!")
+# Footer
+st.markdown("<br><br><hr><center><small>Informatics Engineering | Digitech University 2026</small></center>", unsafe_allow_html=True)
